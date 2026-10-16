@@ -15,7 +15,7 @@ On startup, the KLR200 micro initializes the AT86RF233 with the following packet
 - [5x more of same]
 - `81 FF` (reply `06`) -- read radio status -> RX_ON
 - `CE 0C` -- arm these interrupts: `RX_START` (i.e. message has started arriving), `TRX_END` (complete message has arrived)
-- `C8 2F` -- sets channel 15
+- `C8 2F` -- set channel 15
 
 With this complete, the radio begins scanning channels.
 
@@ -85,7 +85,7 @@ For low-power devices, the micro precedes a message packet with ~510 wake-up pac
 ## ED Measurement and Channel Selection Behavior
 Before sending a message (including the burst of wake-up packets if needed), the micro performs an ED measurement.  Each measurement consists of sending the radio a command to start the measurement, waiting  about 150us, and then reading out the result.  The datasheet says the measurement takes 128us, with a valid return range of 0~83dB.  The return value is added to the radio's base RSSI sensitivity of -94dBm (dB milliwatts) to get the measured dBm value in the range -94 to -11 dBm.
 
-Roughly, speaking, -94 dBm is the noise floor, indicating a clear channel.  Typical ED values when receiving from blinds in my house are -75 to -61 dBm, with one at -37 dBm (likely a control within a few feet of the receiver).  So we would expect the KLF to avoid transmitting on channels where the ED is higher than approximately -80 to -75 dBm.  While averaging or other statistical methods could be used, a simple threshold of -75 dBm is consistent with all of the examples below.
+Roughly speaking, -94 dBm is the noise floor, indicating a clear channel.  Typical ED values when receiving from blinds in my house are -75 to -61 dBm, with one at -37 dBm (likely a control within a few feet of the receiver).  So we would expect the KLF to avoid transmitting on channels where the ED is higher than approximately -80 to -75 dBm.  While averaging or other statistical methods could be used, a simple threshold of -75 dBm is consistent with all of the examples below.
 
 We always observe the micro performing ED measurements in groups of two measurements made in rapid succession.  After this, the micro may do additional groups of two measurements, ~1 ms apart.  In clear-channel operation, the micro appears to make six two-measurement groups (12 measurements total) and then start transmission.  However in cases where the micro decides to change channels, it will often stop short of the full six groups. 
 
@@ -129,12 +129,15 @@ Transcript of KLF checking blinds:
 1. Sends on ch 20 --> no reply
 2. Resends on ch 25 --> reply OK
 
+
 1. Sends on 25 --> no reply
 2. Resends on 15 --> no reply
 3. Resends on 25 --> reply OK     <-- I expected 20 here, not 25 again
 
+
 1. Sends on 25 --> no reply
 2. Resends on 20 --> reply OK     <-- I expected 15 here, not 20
+
 
 1. Sends on 20 --> no reply
 2. Resends on 25 --> reply OK
@@ -145,4 +148,4 @@ From this data it seems like the KLR always tries the last channel that worked, 
 
 There's a possibility that the KLR is remembering the last channel that worked for each device, but in that case you wouldn't expect the next message to always be on the last channel that worked (although there aren't many data points here).
 
-Since it does an ED check before sending, it's also possible that it's remembering the channel with the lowest ED as its "go-to" alternate channel.  Or keeping a count of the number of successful sends per channel?
+Since it does an ED check before sending, it's also possible that it's remembering the channel with the lowest ED as its "go-to" alternate channel.  Or keeping a count of the number of successful sends per channel?  Or possibly just randomly-selected?
