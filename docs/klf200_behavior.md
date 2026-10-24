@@ -1,7 +1,7 @@
 # KLF200 Radio Behavior
 
 ## Radio Init
-On startup, the KLR200 micro initializes the AT86RF233 with the following packets set at a rate ~10us between commands (all values in hex):
+On startup, the KLF200 micro initializes the AT86RF233 with the following packets set at a rate ~10us between commands (all values in hex):
 - `C3 00` -- turns off CLKM output
 - `C4 20` -- turns off IRQ_MASK_MODE
 - `C2 03` -- turns off radio (sets status to FORCE_TX_OFF) 
@@ -144,8 +144,8 @@ Transcript of KLF checking blinds:
 
 In these cases, all ED tests were successful i.e. the KLF did not change channels after the ED calculation.
 
-From this data it seems like the KLR always tries the last channel that worked, however if a channel doesn't work, the channel it tries next is not always the next channel in numeric order.
+From this data it seems like the KLF always tries the last channel that worked, however if a channel doesn't work, the channel it tries next is not always the next channel in numeric order.
 
-There's a possibility that the KLR is remembering the last channel that worked for each device, but in that case you wouldn't expect the next message to always be on the last channel that worked (although there aren't many data points here).
+There's a possibility that the KLF is remembering the last channel that worked for each device, but in that case you wouldn't expect the next message to always be on the last channel that worked (although there aren't many data points here).
 
 Since it does an ED check before sending, it's also possible that it's remembering the channel with the lowest ED as its "go-to" alternate channel.  Or keeping a count of the number of successful sends per channel?  Or possibly just randomly-selected?
